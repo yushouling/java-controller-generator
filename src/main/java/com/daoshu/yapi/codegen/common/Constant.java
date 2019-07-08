@@ -2,6 +2,7 @@ package com.daoshu.yapi.codegen.common;
 
 /**
  * 常量
+ * @author YUSL
  */
 public class Constant {
     /**

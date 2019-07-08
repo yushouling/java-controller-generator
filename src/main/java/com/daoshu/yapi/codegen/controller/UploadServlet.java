@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
+/**
+ * 上传文件
+ */
 @WebServlet("/upload")
 @MultipartConfig
 public class UploadServlet extends HttpServlet {

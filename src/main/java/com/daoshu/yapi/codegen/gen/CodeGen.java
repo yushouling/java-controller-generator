@@ -24,13 +24,10 @@ import java.util.Set;
 @RequestMapping
 public class CodeGen {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodeGen.class);
-    /**
-     * 生成代码的存放目录
-     */
-    //public static final String GEN_CODE_PATH = System.getProperty("user.dir")+ "\\gen\\";
 
     /**
      * 生成代码文件
+     *
      * @param packageName
      * @param classVOList
      */
@@ -40,37 +37,37 @@ public class CodeGen {
         String path;
         String dirName;
 
-         try {
-             for(ClassVO classVO : classVOList) {
-                 StringBuilder sbd = appendClassCode(packageName, classVO);
-                 // 创建文件夹
-                 dirName = packageName.replaceAll("\\.", "\\\\");
-                 path = codePath + dirName + "\\";
+        try {
+            for (ClassVO classVO : classVOList) {
+                StringBuilder sbd = appendClassCode(packageName, classVO);
+                // 创建文件夹
+                dirName = packageName.replaceAll("\\.", "\\\\");
+                path = codePath + dirName + "\\";
 
-                 file = new File(path);
-                 file.mkdirs();
+                file = new File(path);
+                file.mkdirs();
 
-                 // 创建文件
-                 path = path  + classVO.getClassName() + ".java";
-                 LOGGER.info("创建文件: " + path);
-                 file = new File(path);
-                 file.createNewFile();
+                // 创建文件
+                path = path + classVO.getClassName() + ".java";
+                LOGGER.info("创建文件: " + path);
+                file = new File(path);
+                file.createNewFile();
 
-                 fileWriter = new FileWriter(path);
-                 fileWriter.write(sbd.toString());
-                 fileWriter.close();
-             }
-         }catch (Exception e) {
-             LOGGER.error("", e);
-         } finally {
-             if(fileWriter != null) {
-                 try {
-                     fileWriter.close();
-                 } catch (IOException e) {
-                     LOGGER.error("", e);
-                 }
-             }
-         }
+                fileWriter = new FileWriter(path);
+                fileWriter.write(sbd.toString());
+                fileWriter.close();
+            }
+        } catch (Exception e) {
+            LOGGER.error("", e);
+        } finally {
+            if (fileWriter != null) {
+                try {
+                    fileWriter.close();
+                } catch (IOException e) {
+                    LOGGER.error("", e);
+                }
+            }
+        }
     }
 
     public static void main(String[] args) {
@@ -79,8 +76,9 @@ public class CodeGen {
 
     /**
      * 组装类代码
+     *
      * @param packageName 包名
-     * @param jsonInfoVO 类信息
+     * @param jsonInfoVO  类信息
      * @return
      */
     private StringBuilder appendClassCode(String packageName, ClassVO jsonInfoVO) {
@@ -101,13 +99,13 @@ public class CodeGen {
         // 类start
         sbd.append("public class ").append(jsonInfoVO.getClassName()).append(" {");
         addLine(sbd);
-        for(MethodVO methodVO : jsonInfoVO.getMethodList()) {
+        for (MethodVO methodVO : jsonInfoVO.getMethodList()) {
             // 方法start
             addMethodNote(sbd, methodVO.getMethodDesc());
             // 参数注解
             Set<RequestParamsVO> requestParams = methodVO.getRequestParams();
-            if(requestParams != null) {
-                if("GET".equalsIgnoreCase(methodVO.getRequestType())) {
+            if (requestParams != null) {
+                if ("GET".equalsIgnoreCase(methodVO.getRequestType())) {
                     addMethodSwaggerAnnotation(sbd, methodVO.getMethodDesc(), requestParams);
                     add1Space(sbd);
                     sbd.append("@GetMapping(\"").append(methodVO.getRequestPath()).append("\")");
@@ -121,8 +119,8 @@ public class CodeGen {
             add1Space(sbd);
             sbd.append("public String ").append(methodVO.getMethodName()).append("(");
             // 参数start
-            if(! CollectionUtils.isEmpty(requestParams) && "GET".equalsIgnoreCase(methodVO.getRequestType())) {
-                for(RequestParamsVO requestParamsVO : requestParams) {
+            if (!CollectionUtils.isEmpty(requestParams) && "GET".equalsIgnoreCase(methodVO.getRequestType())) {
+                for (RequestParamsVO requestParamsVO : requestParams) {
                     sbd.append("String ").append(requestParamsVO.getName()).append(",");
                 }
                 deleteLastChar(sbd);
@@ -149,6 +147,7 @@ public class CodeGen {
 
     /**
      * 增加方法注释
+     *
      * @param sbd
      * @param methodDesc
      */
@@ -167,6 +166,7 @@ public class CodeGen {
 
     /**
      * 增加类注释
+     *
      * @param sbd
      * @param classDesc
      */
@@ -185,6 +185,7 @@ public class CodeGen {
 
     /**
      * 删除最后一个逗号
+     *
      * @param sbd
      */
     private void deleteLastChar(StringBuilder sbd) {
@@ -193,11 +194,12 @@ public class CodeGen {
 
     /**
      * 方法加swagger注解
+     *
      * @param sbd
      * @param requestParams
      */
     private void addMethodSwaggerAnnotation(StringBuilder sbd, String methodDesc, Set<RequestParamsVO> requestParams) {
-        if(CollectionUtils.isEmpty(requestParams)) return;
+        if (CollectionUtils.isEmpty(requestParams)) return;
 
         int index = 0;
         add1Space(sbd);
@@ -206,8 +208,8 @@ public class CodeGen {
         add1Space(sbd);
         sbd.append("@ApiImplicitParams({");
         addLine(sbd);
-        for(RequestParamsVO requestParamsVO : requestParams) {
-            index ++;
+        for (RequestParamsVO requestParamsVO : requestParams) {
+            index++;
             add2Space(sbd);
             sbd.append("@ApiImplicitParam(name = \"")
                     .append(requestParamsVO.getName())
@@ -218,7 +220,7 @@ public class CodeGen {
                 sbd.append(", required = ").append(requestParamsVO.getRequired());
             }
             sbd.append(", dataType = \"String\"),");
-            if(requestParams.size() != index) {
+            if (requestParams.size() != index) {
                 // 最后一个参数不换行
                 addLine(sbd);
             }
@@ -232,6 +234,7 @@ public class CodeGen {
 
     /**
      * 增加一行空行
+     *
      * @param sbd
      */
     void addBlankLine(StringBuilder sbd) {
@@ -240,6 +243,7 @@ public class CodeGen {
 
     /**
      * 换行
+     *
      * @param sbd
      */
     void addLine(StringBuilder sbd) {
@@ -248,6 +252,7 @@ public class CodeGen {
 
     /**
      * 增加1个缩进
+     *
      * @param sbd
      */
     void add1Space(StringBuilder sbd) {
@@ -256,6 +261,7 @@ public class CodeGen {
 
     /**
      * 增加2个缩进
+     *
      * @param sbd
      */
     void add2Space(StringBuilder sbd) {
@@ -264,6 +270,7 @@ public class CodeGen {
 
     /**
      * 增加3个缩进
+     *
      * @param sbd
      */
     void add3Space(StringBuilder sbd) {

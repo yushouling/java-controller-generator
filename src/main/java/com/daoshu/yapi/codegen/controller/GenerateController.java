@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.zip.ZipOutputStream;
 
 /**
- * 生成代码地址
+ * 生成代码
+ *
+ * @author YUSL
  */
 @RestController
 public class GenerateController {
@@ -70,7 +72,7 @@ public class GenerateController {
 
         // 上传的json文件目录
         String uploadPath = request.getSession().getServletContext().getRealPath("/upload");
-        String jsonContent = ParseYApiJson.readFile(uploadPath+ "\\" + jsonFileName);
+        String jsonContent = ParseYApiJson.readFile(uploadPath + "\\" + jsonFileName);
         if (StringUtils.isEmpty(jsonContent)) {
             return "解析失败！文件不存在";
         }
@@ -81,7 +83,7 @@ public class GenerateController {
             List<ClassVO> classVOList = ParseYApiJson.jsonDataMapper(jsonContent);
             String timeFolderName = timeFolderName();
             // 上传目录
-            String uploadFolderPath =  codePath + "\\"  + timeFolderName;
+            String uploadFolderPath = codePath + "\\" + timeFolderName;
             new CodeGen().createFile(packageName, classVOList, uploadFolderPath);
 
             // 压缩包里第一个文件夹名称

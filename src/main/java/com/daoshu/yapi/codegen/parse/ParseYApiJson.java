@@ -18,6 +18,8 @@ import java.util.Set;
 
 /**
  * 解析YApi导出的json数据
+ *
+ * @author YUSL
  */
 public class ParseYApiJson {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParseYApiJson.class);
