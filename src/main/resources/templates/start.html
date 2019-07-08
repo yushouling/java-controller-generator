@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>YApi接口代码生成 - MTI</title>
+
+    <style>
+        .control-input {
+            width: 400px;
+            height: 40px;
+            font-family: Karla, sans-serif;
+            font-size: 18px;
+        }
+
+        .colset-submit {
+            padding-top: 20px;
+            padding-left: 300px;
+        }
+
+        .button.primary {
+            padding: 8px 35px;
+            color: #fff;
+            border: 2px solid #6db33f;
+            background-color: #6db33f;
+            border-radius: 0.25em;
+        }
+
+        a:link {
+            color: #2199e8;
+        }
+
+        a:visited {
+            color: #2199e8;
+        }
+
+        a:hover {
+            color: #1583cc;
+        }
+
+        a:active {
+            color: #2199e8;
+        }
+    </style>
+
+    <script>
+        function validate_form(form) {
+            var file = document.getElementById("file").value;
+            if (file == "") {
+                alert("请上传文件！");
+                return false;
+            }
+            form.submit();
+        }
+    </script>
+</head>
+<body>
+<div class="colset">
+    <h3>YApi接口代码生成</h3>
+    <form autocomplete="off" name="genForm" action="/generate" method="post" onsubmit="return validate_form(this);">
+        <div style="padding-top: 200px; padding-left: 320px;">
+
+            <a href="upload.html">上传文件：</a>
+            <input type="hidden" id="file" name="file" th:value="${uploadedFileName}">
+            <input type="text" style="height: 40px;font-size: 18px;" th:value="${originalFileName}" onclick="javascript:window.location.href='upload.html';" readonly>
+
+            <div style="padding-top: 20px;"></div>
+
+            <label for="package">包名：</label>
+            <input type="text" id="package" name="package" class="control-input" value="com.daoshu.demo.controller">
+            <button class="button primary" type="submit" id="generate-project">开始生成</button>
+
+            <div style="padding-top: 50px; color: darkgrey;">
+                <a href="sapi_export.png" target="_blank">YApi导出json步骤</a>
+            </div>
+        </div>
+    </form>
+
+    <footer style="padding:80px;text-align:center;color:#D3D3D3;position:relative;">
+        ©2019 MTI
+    </footer>
+</div>
+
+</body>
+</html>
