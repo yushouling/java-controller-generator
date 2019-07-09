@@ -51,6 +51,13 @@
             }
             form.submit();
         }
+        function validate_input() {
+            var file = document.getElementById("file").value;
+            if (file == "") {
+                alert("请先上传文件！");
+                return false;
+            }
+        }
     </script>
 </head>
 <body>
@@ -66,7 +73,7 @@
             <div style="padding-top: 20px;"></div>
 
             <label for="package">包名：</label>
-            <input type="text" id="package" name="package" class="control-input" value="com.daoshu.demo.controller">
+            <input type="text" id="package" name="package" class="control-input" value="com.daoshu.demo.controller" onkeypress="return validate_input();">
             <button class="button primary" type="submit" id="generate-project">开始生成</button>
 
             <div style="padding-top: 50px; color: darkgrey;">

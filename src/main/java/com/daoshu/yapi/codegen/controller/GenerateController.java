@@ -80,10 +80,10 @@ public class GenerateController {
         String codePath = request.getSession().getServletContext().getRealPath("/code");
         LOGGER.error("开始生成代码，存放目录：" + codePath);
         try {
-            List<ClassVO> classVOList = ParseYApiJson.jsonDataMapper(jsonContent);
             String timeFolderName = timeFolderName();
             // 上传目录
             String uploadFolderPath = codePath + "\\" + timeFolderName;
+            List<ClassVO> classVOList = ParseYApiJson.jsonDataMapper(jsonContent, packageName, uploadFolderPath);
             new CodeGen().createFile(packageName, classVOList, uploadFolderPath);
 
             // 压缩包里第一个文件夹名称
@@ -114,8 +114,6 @@ public class GenerateController {
             ZipUtils.doCompress(uploadFolderPath + firstFolderName, out);
 
             // 下载完成后异步删除时间文件夹
-            /*timeFolderName = timeFolderName.replaceAll("\\\\", "");
-            String finalTimeFolderName = timeFolderName;*/
             new Thread(new Runnable() {
                 @Override
                 public void run() {

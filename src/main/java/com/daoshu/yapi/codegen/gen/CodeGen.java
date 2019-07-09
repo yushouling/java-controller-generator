@@ -6,8 +6,7 @@ import com.daoshu.yapi.codegen.vo.RequestParamsVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -20,8 +19,6 @@ import java.util.Set;
  *
  * @author YUSL
  */
-@RestController
-@RequestMapping
 public class CodeGen {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodeGen.class);
 
@@ -70,8 +67,45 @@ public class CodeGen {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println("a.c.3".replaceAll("\\.", "\\\\"));
+    /**
+     * 生成DTO代码文件
+     * @param packageName
+     * @param codePath
+     * @param dtoFileName
+     * @param dtoBuilder
+     */
+    public void createDTOFile(String packageName, String codePath, String dtoFileName, StringBuilder dtoBuilder) {
+        File file;
+        FileWriter fileWriter = null;
+        String path;
+        String dirName;
+        try {
+                // 创建文件夹
+                dirName = packageName.replaceAll("\\.", "\\\\");
+                path = codePath + dirName + "\\";
+                file = new File(path);
+                file.mkdirs();
+
+                // 创建文件
+                path = path + dtoFileName + ".java";
+                LOGGER.info("创建文件: " + path);
+                file = new File(path);
+                file.createNewFile();
+
+                fileWriter = new FileWriter(path);
+                fileWriter.write(dtoBuilder.toString());
+                fileWriter.close();
+        } catch (Exception e) {
+            LOGGER.error("", e);
+        } finally {
+            if (fileWriter != null) {
+                try {
+                    fileWriter.close();
+                } catch (IOException e) {
+                    LOGGER.error("", e);
+                }
+            }
+        }
     }
 
     /**
@@ -89,7 +123,12 @@ public class CodeGen {
         sbd.append("import org.springframework.web.bind.annotation.*;");
         addLine(sbd);
         sbd.append("import io.swagger.annotations.*;");
-
+        addLine(sbd);
+        // 上一层的包名
+        String parentPackage = packageName.substring(0 ,packageName.lastIndexOf("."));
+        sbd.append("import ").append(parentPackage).append(".dto.req.*;");
+        addLine(sbd);
+        sbd.append("import ").append(parentPackage).append(".dto.res.*;");
         addBlankLine(sbd);
         addClassNote(sbd, jsonInfoVO.getClassDesc());
         sbd.append("@RestController");
@@ -104,20 +143,18 @@ public class CodeGen {
             addMethodNote(sbd, methodVO.getMethodDesc());
             // 参数注解
             Set<RequestParamsVO> requestParams = methodVO.getRequestParams();
-            if (requestParams != null) {
-                if ("GET".equalsIgnoreCase(methodVO.getRequestType())) {
-                    addMethodSwaggerAnnotation(sbd, methodVO.getMethodDesc(), requestParams);
-                    add1Space(sbd);
-                    sbd.append("@GetMapping(\"").append(methodVO.getRequestPath()).append("\")");
-                } else {
-                    // 对象参数
-                    add1Space(sbd);
-                    sbd.append("@PostMapping(\"").append(methodVO.getRequestPath()).append("\")");
-                }
+            if ("GET".equalsIgnoreCase(methodVO.getRequestType())) {
+                addMethodSwaggerAnnotation(sbd, methodVO.getMethodDesc(), requestParams);
+                add1Space(sbd);
+                sbd.append("@GetMapping(\"").append(methodVO.getRequestPath()).append("\")");
+            } else {
+                // 对象参数
+                add1Space(sbd);
+                sbd.append("@PostMapping(\"").append(methodVO.getRequestPath()).append("\")");
             }
             addLine(sbd);
             add1Space(sbd);
-            sbd.append("public String ").append(methodVO.getMethodName()).append("(");
+            sbd.append("public ").append(methodVO.getResponseType()).append(" ").append(methodVO.getMethodName()).append("(");
             // 参数start
             if (!CollectionUtils.isEmpty(requestParams) && "GET".equalsIgnoreCase(methodVO.getRequestType())) {
                 for (RequestParamsVO requestParamsVO : requestParams) {
@@ -126,6 +163,11 @@ public class CodeGen {
                 deleteLastChar(sbd);
             } else {
                 // POST/PUT
+                if(! StringUtils.isEmpty(methodVO.getRequestBody())) {
+                    // 小写参数名
+                    String reqLowerName = methodVO.getRequestBody().substring(0,1).toLowerCase() + methodVO.getRequestBody().substring(1);
+                    sbd.append("@RequestBody ").append(methodVO.getRequestBody()).append(" ").append(reqLowerName);
+                }
             }
             // 参数end
             sbd.append(") {");
@@ -151,7 +193,7 @@ public class CodeGen {
      * @param sbd
      * @param methodDesc
      */
-    private void addMethodNote(StringBuilder sbd, String methodDesc) {
+    public void addMethodNote(StringBuilder sbd, String methodDesc) {
         addLine(sbd);
         add1Space(sbd);
         sbd.append("/**");
@@ -165,12 +207,33 @@ public class CodeGen {
     }
 
     /**
+     * 增加属性注释
+     * @param sbd
+     * @param desc
+     */
+    public void addFieldNote(StringBuilder sbd, String desc) {
+        addLine(sbd);
+        add1Space(sbd);
+        sbd.append("/**");
+        addLine(sbd);
+        add1Space(sbd);
+        sbd.append(" * ").append(desc);
+        addLine(sbd);
+        add1Space(sbd);
+        sbd.append(" */");
+        addLine(sbd);
+        add1Space(sbd);
+        sbd.append("@ApiModelProperty(\"").append(desc).append("\")");
+        addLine(sbd);
+    }
+
+    /**
      * 增加类注释
      *
      * @param sbd
      * @param classDesc
      */
-    private void addClassNote(StringBuilder sbd, String classDesc) {
+    public void addClassNote(StringBuilder sbd, String classDesc) {
         sbd.append("/**");
         addLine(sbd);
         sbd.append(" * ").append(classDesc);
@@ -188,7 +251,7 @@ public class CodeGen {
      *
      * @param sbd
      */
-    private void deleteLastChar(StringBuilder sbd) {
+    public void deleteLastChar(StringBuilder sbd) {
         sbd.deleteCharAt(sbd.length() - 1);
     }
 
@@ -237,7 +300,7 @@ public class CodeGen {
      *
      * @param sbd
      */
-    void addBlankLine(StringBuilder sbd) {
+    public void addBlankLine(StringBuilder sbd) {
         sbd.append(System.lineSeparator()).append(System.lineSeparator());
     }
 
@@ -246,7 +309,7 @@ public class CodeGen {
      *
      * @param sbd
      */
-    void addLine(StringBuilder sbd) {
+    public void addLine(StringBuilder sbd) {
         sbd.append(System.lineSeparator());
     }
 
@@ -255,7 +318,7 @@ public class CodeGen {
      *
      * @param sbd
      */
-    void add1Space(StringBuilder sbd) {
+    public void add1Space(StringBuilder sbd) {
         sbd.append("    ");
     }
 
@@ -264,7 +327,7 @@ public class CodeGen {
      *
      * @param sbd
      */
-    void add2Space(StringBuilder sbd) {
+    public void add2Space(StringBuilder sbd) {
         sbd.append("        ");
     }
 
@@ -273,7 +336,7 @@ public class CodeGen {
      *
      * @param sbd
      */
-    void add3Space(StringBuilder sbd) {
+    public void add3Space(StringBuilder sbd) {
         sbd.append("            ");
     }
 }

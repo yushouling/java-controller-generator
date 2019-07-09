@@ -73,4 +73,10 @@ public class MethodVO {
      */
     private Set<RequestParamsVO> requestParams;
 
+    /**
+     * 当"res_body_type": "json"时返回ResultVO
+     * 返回类型
+     */
+    private String responseType;
+
 }
