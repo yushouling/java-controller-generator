@@ -49,6 +49,10 @@ public class UploadServlet extends HttpServlet {
                 suffixName = originalFileName.substring(fileSuffixIndex);
             }
             uploadedFileName = uuid + suffixName;
+            File uploadFolder = new File(tagDir);
+            if(! uploadFolder.exists()) {
+                uploadFolder.mkdirs();
+            }
             output = new FileOutputStream(new File(tagDir, uploadedFileName));
             int len = 0;
             byte[] buff = new byte[1024 * 8];
