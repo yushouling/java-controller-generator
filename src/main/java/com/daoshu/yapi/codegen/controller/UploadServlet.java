@@ -101,7 +101,7 @@ public class UploadServlet extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-        doGet(request, response);
+        doPost(request, response);
     }
 
 }
