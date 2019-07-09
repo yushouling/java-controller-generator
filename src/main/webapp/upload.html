@@ -5,10 +5,14 @@
     <title>文件上传</title>
 
     <script>
+        var flag = true;
         function validate_form(form) {
             var file = document.getElementById("file").value;
-            if(file == null) {
+            if(file == "") {
                 alert("请选择文件！");
+                return false;
+            }
+            if(flag == false) {
                 return false;
             }
             form.submit();
@@ -23,13 +27,19 @@
 
             if (suffix != 'json') {
                 alert("您选择的不是json文件");
+                flag = false;
+                return false;
             }
 
             /*(2)获取文件大小，以Kb为单位*/
             fileSize = file.files[0].size / 1024;
             if (fileSize > 10000) {
                 alert("文件不能大于10M");
+                flag = false;
+                return false;
             }
+            flag = true;
+            return true;
         }
 
     </script>
@@ -72,7 +82,7 @@
         上传YApi导出的json文件：<br/>
         <hr/>
         <input style="background: #6db33f;border: 2px solid #6db33f;border-radius: 0.25em;padding: 6px 20px;"
-              id="file" type="file" name="uploadFile" onchange="getFilesize(this)"><br/><br/><br/>
+              id="file" type="file" name="uploadFile" onchange="return getFilesize(this)"><br/><br/><br/>
         <input type="submit"
                style="background: #2199e8;border: 2px solid #2199e8;border-radius: 0.25em;padding: 6px 20px;"
                value="  上传  ">
