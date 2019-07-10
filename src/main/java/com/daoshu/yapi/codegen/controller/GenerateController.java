@@ -44,9 +44,11 @@ public class GenerateController {
 
         String uploadedFileName = (String) request.getAttribute(Constant.UPLOADED_FILE_NAME);
         String originalFileName = (String) request.getAttribute(Constant.ORIGINAL_FILE_NAME);
+        List<String> classNameList = (List<String>) request.getAttribute(Constant.CLASS_NAME_LIST);
         if (!StringUtils.isEmpty(uploadedFileName)) {
             mv.addObject(Constant.UPLOADED_FILE_NAME, uploadedFileName);
             mv.addObject(Constant.ORIGINAL_FILE_NAME, originalFileName);
+            mv.addObject(Constant.CLASS_NAME_LIST, classNameList);
         }
         return mv;
     }
@@ -60,6 +62,7 @@ public class GenerateController {
     @PostMapping("/generate")
     public String generate(@RequestParam(name = "package", required = false) String packageName,
                            @RequestParam(name = "file", required = false) String jsonFileName,
+                           @RequestParam(name = "classNameSelected", required = false) String[] classNameSelected,
                            HttpServletResponse response, HttpServletRequest request) {
         if (StringUtils.isEmpty(jsonFileName)) {
             return "解析文件不存在！";
@@ -69,6 +72,11 @@ public class GenerateController {
         } else {
             packageName = packageName.trim();
         }
+        if(classNameSelected == null || classNameSelected.length <= 0) {
+            return "没有需要生成的接口！";
+        }
+
+        LOGGER.info("   >>>classNameSelected:" + classNameSelected);
 
         // 上传的json文件目录
         String uploadPath = request.getSession().getServletContext().getRealPath("/upload");
@@ -83,7 +91,7 @@ public class GenerateController {
             String timeFolderName = timeFolderName();
             // 上传目录
             String uploadFolderPath = codePath + "\\" + timeFolderName;
-            List<ClassVO> classVOList = ParseYApiJson.jsonDataMapper(jsonContent, packageName, uploadFolderPath);
+            List<ClassVO> classVOList = ParseYApiJson.jsonDataMapper(jsonContent, packageName, uploadFolderPath, classNameSelected);
             new CodeGen().createFile(packageName, classVOList, uploadFolderPath);
 
             // 压缩包里第一个文件夹名称

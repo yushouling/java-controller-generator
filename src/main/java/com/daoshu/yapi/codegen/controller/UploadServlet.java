@@ -1,10 +1,12 @@
 package com.daoshu.yapi.codegen.controller;
 
 import com.daoshu.yapi.codegen.common.Constant;
+import com.daoshu.yapi.codegen.parse.ParseYApiJson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.ServletException;
@@ -30,13 +32,15 @@ public class UploadServlet extends HttpServlet {
         String uploadedFileName = "";
         // 原文件名
         String originalFileName = "";
+        // 上传目录
+        String uploadPath = "";
         try {
             request.setCharacterEncoding("UTF-8");
             Part part = request.getPart("uploadFile");
             originalFileName = part.getSubmittedFileName();
             input = part.getInputStream();
             // 要保存的目标文件的目录
-            String tagDir = getServletContext().getRealPath("upload");
+            uploadPath = getServletContext().getRealPath("upload");
             // 避免文件名重复使用uuid来避免,产生一个随机的uuid字符
             String uuid = UUID.randomUUID().toString().replaceAll("-", "");
             // 后缀名
@@ -49,11 +53,11 @@ public class UploadServlet extends HttpServlet {
                 suffixName = originalFileName.substring(fileSuffixIndex);
             }
             uploadedFileName = uuid + suffixName;
-            File uploadFolder = new File(tagDir);
+            File uploadFolder = new File(uploadPath);
             if(! uploadFolder.exists()) {
                 uploadFolder.mkdirs();
             }
-            output = new FileOutputStream(new File(tagDir, uploadedFileName));
+            output = new FileOutputStream(new File(uploadPath, uploadedFileName));
             int len = 0;
             byte[] buff = new byte[1024 * 8];
             while ((len = input.read(buff)) > -1) {
@@ -78,9 +82,12 @@ public class UploadServlet extends HttpServlet {
             }
         }
         try {
+            List<String> classNameList = ParseYApiJson.getClassNameList(uploadPath, uploadedFileName);
+
             // 请求转发到生成代码页
             request.setAttribute(Constant.UPLOADED_FILE_NAME, uploadedFileName);
             request.setAttribute(Constant.ORIGINAL_FILE_NAME, originalFileName);
+            request.setAttribute(Constant.CLASS_NAME_LIST, classNameList);
             request.getRequestDispatcher("/").forward(request, response);
         } catch (ServletException e) {
             e.printStackTrace();

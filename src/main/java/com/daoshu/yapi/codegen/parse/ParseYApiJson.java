@@ -29,7 +29,7 @@ public class ParseYApiJson {
      * @param jsonContent
      * @return
      */
-    public static List<ClassVO> jsonDataMapper(String jsonContent, String packageName, String uploadFolderPath) {
+    public static List<ClassVO> jsonDataMapper(String jsonContent, String packageName, String uploadFolderPath, String[] selectedClassArr) {
         if (StringUtils.isEmpty(jsonContent)) return null;
         List<JSONObject> objects = JSONObject.parseArray(jsonContent, JSONObject.class);
         List<ClassVO> classVOList = new ArrayList<>();
@@ -39,11 +39,17 @@ public class ParseYApiJson {
         Set<RequestParamsVO> requestParamsVOS;
         RequestParamsVO requestParamsVO;
         String splitSymbol = Constant.MIDDLE_LINE;
+        List<String> selectedClassList = Arrays.asList(selectedClassArr);
         for (JSONObject jsonObject : objects) {
             classVO = new ClassVO();
             methodList = new HashSet<>();
             // 类名
             String originalClassName = jsonObject.getString("name");
+            // 只生成前端选择的接口类
+            if(! selectedClassList.contains(originalClassName)) {
+                continue;
+            }
+
             // 格式良好的类名
             String wellFormedClassName = "";
             if (StringUtils.isEmpty(originalClassName)) continue;
@@ -109,6 +115,32 @@ public class ParseYApiJson {
             classVOList.add(classVO);
         }
         return classVOList;
+    }
+
+    /**
+     * 得到接口分类列表
+     * @param uploadPath
+     * @param jsonFileName
+     * @return
+     */
+    public static List<String> getClassNameList(String uploadPath, String jsonFileName) {
+        try {
+            String jsonContent = ParseYApiJson.readFile(uploadPath + "\\" + jsonFileName);
+            if (StringUtils.isEmpty(jsonContent)) return null;
+            List<JSONObject> objects = JSONObject.parseArray(jsonContent, JSONObject.class);
+            List<String> classNameList = new ArrayList<>();
+            for (JSONObject jsonObject : objects) {
+                // 类名
+                String originalClassName = jsonObject.getString("name");
+                if (StringUtils.isEmpty(originalClassName)) continue;
+
+                classNameList.add(originalClassName);
+            }
+            return classNameList;
+        } catch (Exception e) {
+            LOGGER.error("", e);
+            return null;
+        }
     }
 
     /**

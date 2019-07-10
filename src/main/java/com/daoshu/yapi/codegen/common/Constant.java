@@ -14,6 +14,10 @@ public class Constant {
      */
     public static final String ORIGINAL_FILE_NAME = "originalFileName";
     /**
+     * 接口名称列表
+     */
+    public static final String CLASS_NAME_LIST = "classNameList";
+    /**
      * 中横线
      */
     public static final String MIDDLE_LINE = "-";

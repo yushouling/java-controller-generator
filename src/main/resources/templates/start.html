@@ -41,30 +41,12 @@
             color: #2199e8;
         }
     </style>
-
-    <script>
-        function validate_form(form) {
-            var file = document.getElementById("file").value;
-            if (file == "") {
-                alert("请上传文件！");
-                return false;
-            }
-            form.submit();
-        }
-        function validate_input() {
-            var file = document.getElementById("file").value;
-            if (file == "") {
-                alert("请先上传文件！");
-                return false;
-            }
-        }
-    </script>
 </head>
 <body>
 <div class="colset">
     <h3>YApi接口代码生成</h3>
     <form autocomplete="off" name="genForm" action="/generate" method="post" onsubmit="return validate_form(this);">
-        <div style="padding-top: 200px; padding-left: 320px;">
+        <div style="padding-top: 150px; padding-left: 320px;">
 
             <a href="upload.html">上传文件：</a>
             <input type="hidden" id="file" name="file" th:value="${uploadedFileName}">
@@ -75,6 +57,16 @@
             <label for="package">包名：</label>
             <input type="text" id="package" name="package" class="control-input" value="com.daoshu.demo.controller" onkeypress="return validate_input();">
             <button class="button primary" type="submit" id="generate-project">开始生成</button>
+
+            <div style="padding-top: 20px;">
+                选择要生成的接口：<label><input type="checkbox" id="classNameAll" onclick="checkAll()"/>全选</label><br>
+                <ul th:each = "obj,iterStat:${classNameList}">
+                    <li >
+                        <label><input name="className" type="checkbox" th:text="${obj}" th:value="${obj}" /></label>
+                    </li>
+                </ul>
+                <input type="hidden" id="classNameSelected" name="classNameSelected">
+            </div>
 
             <div style="padding-top: 50px; color: darkgrey;">
                 <a href="sapi_export.png" target="_blank">YApi导出json步骤</a>
@@ -88,4 +80,61 @@
 </div>
 
 </body>
+<script>
+    // 默认选中所有
+    document.getElementById("classNameAll").click();
+
+    function validate_form(form) {
+        var file = document.getElementById("file").value;
+        if (file == "") {
+            alert("请上传文件！");
+            return false;
+        }
+        var className = getSelectedClassName();
+        if(className == null || className == "") {
+            alert("请选择要生成的接口");
+            return false;
+        }
+        document.getElementById("classNameSelected").value = className;
+        form.submit();
+    }
+    function validate_input() {
+        var file = document.getElementById("file").value;
+        if (file == "") {
+            alert("请先上传文件！");
+            return false;
+        }
+    }
+    function checkAll() {
+        //1.获取编号前面的复选框
+        var checkAllEle = document.getElementById("classNameAll");
+        //2.对编号前面复选框的状态进行判断
+        if(checkAllEle.checked==true){
+            //3.获取下面所有的复选框
+            var checkOnes = document.getElementsByName("className");
+            //4.对获取的所有复选框进行遍历
+            for(var i=0;i<checkOnes.length;i++){
+                //5.拿到每一个复选框，并将其状态置为选中
+                checkOnes[i].checked=true;
+            }
+        }else{
+            //6.获取下面所有的复选框
+            var checkOnes = document.getElementsByName("className");
+            //7.对获取的所有复选框进行遍历
+            for(var i=0;i<checkOnes.length;i++){
+                //8.拿到每一个复选框，并将其状态置为未选中
+                checkOnes[i].checked=false;
+            }
+        }
+    }
+    function getSelectedClassName() {
+        var id = document.getElementsByName('className');
+        var classNameArr = new Array();
+        for(var i = 0; i < id.length; i++){
+            if(id[i].checked)
+                classNameArr.push(id[i].value);
+        }
+        return classNameArr;
+    }
+</script>
 </html>
