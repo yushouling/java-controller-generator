@@ -1,0 +1,97 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>文件上传</title>
+
+    <script>
+        var flag = true;
+        function validate_form(form) {
+            var file = document.getElementById("file").value;
+            if(file == "") {
+                alert("请选择文件！");
+                return false;
+            }
+            if(flag == false) {
+                return false;
+            }
+            form.submit();
+        }
+
+        function getFilesize(file) { //如果上传文件，会触发
+            /*（1）判断文件后缀类型*/
+            var strs = new Array(); //定义一数组
+            var file1 = document.getElementById("file").value; //获取input框的值，文件路径
+            strs = file1.split('.'); //分成数组存储
+            var suffix = strs[strs.length - 1]; //获取文件后缀
+
+            if (suffix != 'json') {
+                alert("您选择的不是json文件");
+                flag = false;
+                return false;
+            }
+
+            /*(2)获取文件大小，以Kb为单位*/
+            fileSize = file.files[0].size / 1024;
+            if (fileSize > 10000) {
+                alert("文件不能大于10M");
+                flag = false;
+                return false;
+            }
+            flag = true;
+            return true;
+        }
+
+    </script>
+
+    <style>
+        .show-for-sr, .show-on-focus {
+            position: absolute !important;
+            width: 1px;
+            height: 1px;
+            /*overflow: hidden;*/
+            clip: rect(0, 0, 0, 0);
+        }
+
+        .button:hover {
+            background: #1583cc;
+            color: #fff;
+        }
+
+        .button {
+            display: inline-block;
+            text-align: center;
+            cursor: pointer;
+            -webkit-appearance: none;
+            transition: all .25s ease-out;
+            border: 1px solid transparent;
+            border-radius: 0;
+            padding: .85em 1em;
+            margin: 0 1rem 1rem 0;
+            font-size: .9rem;
+            background: #2199e8;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<form action="/yapi/upload" enctype="multipart/form-data" method="post" name="uploadForm"
+      onsubmit="return validate_form(this);">
+    <div style="padding: 20px 30px;">
+        上传YApi导出的json文件：
+        <span style="padding-left: 20px; font-size: 13px;">
+            <a href="/img/yapi_export.png" target="_blank">查看导出步骤</a>
+        </span>
+        <br/>
+        <hr/>
+        <input style="background: #6db33f;border: 2px solid #6db33f;border-radius: 0.25em;padding: 6px 20px;"
+              id="file" type="file" name="uploadFile" onchange="return getFilesize(this)"><br/><br/><br/>
+        <input type="submit"
+               style="background: #2199e8;border: 2px solid #2199e8;border-radius: 0.25em;padding: 6px 20px;"
+               value="  上传  ">
+    </div>
+</form>
+
+</body>
+</html>
